@@ -1,6 +1,6 @@
 # File Infecting Virus & Advanced Virus Techniques
 
-## Mô tả
+# Mô tả
 
 Viết chương trình lây nhiễm virus vào tập tin thực thi (tập tin thực thi trên Windows 
 – PE file 32 bits) có tính năng đơn giản (mục đích demo giáo dục) như yêu cầu bên 
@@ -32,11 +32,11 @@ o Call hijacking EPO virus
 o Import Address Table-replacing EPO virus.
 o TLS-based EPO virus.
 
-## Triển khai
+# Triển khai
 
-### THIẾT KẾ PAYLOAD LÂY NHIỄM:
+## THIẾT KẾ PAYLOAD LÂY NHIỄM:
 
-#### Shellcode 
+### Shellcode 
 
 Sử dụng công cụ msfvenom của để tạo shellcode, nội dung shellcode này sẽ hiển thị một message box với nội dung và tiêu đề như yêu cầu trên.
 
@@ -46,7 +46,7 @@ Trong source code C++, sử dụng vector để lưu giá trị shellcode
 
 ![alt text](images/1.shellcode_msfvenom.png)
 
-#### Đọc các thành phần trong tệp tin PE và chỉnh sửa địa chỉ entry point.
+### Đọc các thành phần trong tệp tin PE và chỉnh sửa địa chỉ entry point.
 
 Xây dựng hàm đọc và lấy ra các thông tin như DOS_Header, NT_Headers và Section_Headers
 ![alt text](images/3_pe_header_reader.png)
@@ -55,16 +55,16 @@ Xây dựng hàm đọc và lấy ra các thông tin như DOS_Header, NT_Headers
 
 Đoạn code trên sẽ tạo một section mới có tên là “.infect”, kích thước section là kích thước shellcode + 14(dùng để chèn thêm các vị trí return address và padding). Kết quả hàm trả về là vị trí của section mới trên file.
 
-#### Thêm mới section.
+### Thêm mới section.
 
-##### Ý tưởng thực hiện
+#### Ý tưởng thực hiện
 Xác định kích thước của đoạn shellcode cần chèn vào, rồi tạo section mới có kích thước bằng kích thước của đoạn shellcode.
 Cần xác định section cuối, sau đó thay đổi các tham số mới dựa trên section cuối.
 
 ![alt text](images/5_injected_process.png)
 Sau khi thay đổi địa chỉ Entrypoint của chương trình và chỉ đến địa chỉ của shellcode, sau khi shell code được thực thi xong sẽ có thể quay về địa chỉ ban đầu entrypoint cũ để chương trình thực hiện chức năng gốc.
 
-##### Tạo section mới:
+#### Tạo section mới:
 
 Thiết lập tên section là ‘.infect’ và byte cuối cùng gán là NULL.
 
