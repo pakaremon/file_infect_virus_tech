@@ -49,6 +49,7 @@ Trong source code C++, sử dụng vector để lưu giá trị shellcode
 ### Đọc các thành phần trong tệp tin PE và chỉnh sửa địa chỉ entry point.
 
 Xây dựng hàm đọc và lấy ra các thông tin như DOS_Header, NT_Headers và Section_Headers
+
 ![alt text](images/3_pe_header_reader.png)
 
 ![alt text](images/4_add_new_section_pe.png)
@@ -62,6 +63,7 @@ Xác định kích thước của đoạn shellcode cần chèn vào, rồi tạ
 Cần xác định section cuối, sau đó thay đổi các tham số mới dựa trên section cuối.
 
 ![alt text](images/5_injected_process.png)
+
 Sau khi thay đổi địa chỉ Entrypoint của chương trình và chỉ đến địa chỉ của shellcode, sau khi shell code được thực thi xong sẽ có thể quay về địa chỉ ban đầu entrypoint cũ để chương trình thực hiện chức năng gốc.
 
 #### Tạo section mới:
@@ -82,11 +84,43 @@ Characteristics sẽ gán là đọc, viết, thực thi và chứa code.
 Công thức để làm tròn của các trường có dạng như sau:
 
 ![alt text](images/6_align_padding.png)
+
 Trong đó:
 
 Alignment: là FileAlignment hoặc SectionalAlignment trong OptionalHeader.
 
 Value_to_align: Giá trị cần làm tròn.
 
+
+#### Thay đổi địa chỉ EntryPoint của chương trình
+
+Sau khi tạo mới section địa chỉ entry point mới của chương trình trong optional Headers sẽ chỉ đến địa chỉ PoinToRawData của section mới vừa tạo.
+
+#### Chỉnh sửa shellcode để sau khi thực thi chương trình sẽ quay về địa chỉ entry point ban đầu
+Vì trong payload do metasploite tạo ra, có sử dụng hàm ExitProcess(), nên em sẽ thay hàm này bằng lệnh call để nhảy đến địa chỉ EntryPoint.
+
+![alt text](images/7_modified_shellcode.png)
+
+Địa chỉ EntryPoint cũ khi thêm vào shellcode sẽ có dạng LittleEndian.
+
+## Lây nhiễm sang các tệp tin cùng thư mục
+
+Viết hàm liệt kê các file trong thư mục hiện tại, rồi kiểm tra các file đó có phải là một file thực thi PE hợp lệ không, sau đó lây nhiễm.
+
+### Bỏ qua các file đã bị lây nhiễm:
+
+Chương trình sẽ kiểm tra section cuối của chương trình có phải tên là .infect không. Nếu có thì bỏ qua, nếu không sẽ lây nhiễm.
+
+![alt text](images/8_infected_files.png)
+
+Đoạn code trên sẽ liệt kê tất cả các file trong thư mục hiện tại sau đó kiểm tra xem file có phải là file PE hợp lệ không và đã bị lây nhiễm chưa. Hàm infectedFile sẽ lây nhiễm file bằng cách tạo section mới, thay đổi địa chỉ entrypoint, thêm địa chỉ entry point cũ vào shellcode sau đó chèn shellcode vào vùng nhớ của section mới tạo
+
+![alt text](images/9.png)
+
+## DEMO lây nhiễm tệp tin trong cùng thư mục:
+
+Sau khi lây nhiễm Các file là Notepad và Calc đều bị lây nhiễm.
+
+![alt text](images/10_demo.png)
 
 
