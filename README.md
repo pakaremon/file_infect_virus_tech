@@ -1,5 +1,43 @@
 # File Infecting Virus & Advanced Virus Techniques
 
+## Table of Contents
+
+1. [Mô tả](#mô-tả)
+2. [Triển khai](#triển-khai)
+    - [Thiết kế Payload Lây Nhiễm](#thiết-kế-payload-lây-nhiễm)
+      - [Shellcode](#shellcode)
+      - [Đọc các thành phần trong tệp tin PE và chỉnh sửa địa chỉ entry point](#đọc-các-thành-phần-trong-tệp-tin-pe-và-chỉnh-sửa-địa-chỉ-entry-point)
+      - [Thêm mới section](#thêm-mới-section)
+         - [Ý tưởng thực hiện](#ý-tưởng-thực-hiện)
+         - [Tạo section mới](#tạo-section-mới)
+         - [Thay đổi địa chỉ EntryPoint của chương trình](#thay-đổi-địa-chỉ-entrypoint-của-chương-trình)
+         - [Chỉnh sửa shellcode để sau khi thực thi chương trình sẽ quay về địa chỉ entry point ban đầu](#chỉnh-sửa-shellcode-để-sau-khi-thực-thi-chương-trình-sẽ-quay-về-địa-chỉ-entry-point-ban-đầu)
+      - [Lây nhiễm sang các tệp tin cùng thư mục](#lây-nhiễm-sang-các-tệp-tin-cùng-thư-mục)
+         - [Bỏ qua các file đã bị lây nhiễm](#bỏ-qua-các-file-đã-bị-lây-nhiễm)
+      - [DEMO lây nhiễm tệp tin trong cùng thư mục](#demo-lây-nhiễm-tệp-tin-trong-cùng-thư-mục)
+3. [Phát hiện và Trốn Tránh Máy Ảo và Debugger](#phát-hiện-và-trốn-tránh-máy-ảo-và-debugger)
+    - [Nguyên lý phát hiện sandbox](#nguyên-lý-phát-hiện-sandbox)
+      - [Nguyên lý phát hiện sandbox trong VMWARE](#nguyên-lý-phát-hiện-sandbox-trong-vmware)
+      - [Nguyên lý phát hiện sandbox trong Cuckoo Sandbox](#nguyên-lý-phát-hiện-sandbox-trong-cuckoo-sandbox)
+    - [Anti-debugging, Anti-VM](#anti-debugging-anti-vm)
+      - [Nhận biết đang chạy trong môi trường máy ảo](#nhận-biết-đang-chạy-trong-môi-trường-máy-ảo)
+      - [Nhận biết, phát hiện đang bị gỡ lỗi (debugging)](#nhận-biết-phát-hiện-đang-bị-gỡ-lỗi-debugging)
+    - [Kịch bản demo](#kịch-bản-demo)
+4. [Environmental Keying](#environmental-keying)
+5. [APT41](#apt41)
+    - [Tổng quan về APT41](#tổng-quan-về-apt41)
+    - [Sử dụng code-signing để phát tán mã độc](#sử-dụng-code-signing-để-phát-tán-mã-độc)
+    - [Sơ đồ lây nhiễm](#sơ-đồ-lây-nhiễm)
+      - [Bước1: Initial Compromise](#bước1-initial-compromise)
+      - [Bước2: Establish Foothold](#bước2-establish-foothold)
+      - [Bước4: Escalate Privileges](#bước4-escalate-privileges)
+      - [Bước5: Internal Reconnaissance](#bước5-internal-reconnaissance)
+      - [Bước6: Lateral Movement](#bước6-lateral-movement)
+      - [Bước7: Maintain Presence](#bước7-maintain-presence)
+      - [Bước8: Complete Mission](#bước8-complete-mission)
+    - [Kỹ thuật Environmental Keying mà APT41 sử dụng](#kỹ-thuật-environmental-keying-mà-apt41-sử-dụng)
+6. [Tham khảo](#tham-khảo)
+
 # Mô tả
 
 Viết chương trình lây nhiễm virus vào tập tin thực thi (tập tin thực thi trên Windows 
