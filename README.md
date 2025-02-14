@@ -242,3 +242,190 @@ Kết quả: khi chạy trên phần mềm VMware, mã độc sẽ in ra màn h�
 Khi chạy trên máy ảo và tắt chế độ phát hiện máy ảo, nếu chạy bằng x64dbg thì mã độc sẽ in ra màn hình phát hiện debugger và không thực thi payload. Ngược lại nếu em chạy bằng cửa sổ dòng lệnh của window thì nó sẽ thực thi payload và khi chạy file NOTEPAD.exe sẽ in ra màn hình của sổ có 20521143.
 
 
+# Environmental Keying
+
+Đây là một kỹ thuật cho phép các loại mã độc có khả năng giải mã các đoạn payload mã độc dựa trên một môi trường máy tính mục tiêu cụ thể:
+
+Ưu điểm: cho phép chỉ giải mã và thực thi đoạn mã độc cho mục tiêu đối tượng cụ thể. Tránh thực thi mã độc trên tất cả đối tượng. Điều nay giúm tăng khả năng trốn tránh, giảm thiểu rủi ro bị phát hiện.
+
+Nhược điểm: Cần hiểu biết rõ về mục tiêu và đối tượng nhắm đến và đặc điểm cụ thể của của đối tượng.
+
+
+Em chọn tìm hiểu về cách thức sử dụng kỹ thuật này trong mã độc APT41.
+
+# APT41
+
+## Tổng quan về APT41
+Sơ lược: APT41 là loại mã độc được tạo ra, điều khiển bởi một nhóm hacker người Trung Quốc. Đối tượng mà loại mã độc này hướng tới nhằm vào các công ty, tổ chức liên quan
+
+đến trò chơi điện tử, điện tín, sức khỏe. Mục đích của mã độc này nhằm đánh cắp các tài khoản chứng thực, các loại tài sản số của các tổ chức.
+
+![alt text](images/22_apt41.png)
+
+Như hình 10 cho thấy đối tượng mà APT41 nhắm tới nhiều nhất là các công ty video game.
+
+Ngoài ra đối tượng hướng tới của APT41 rất đa dạng.
+
+![alt text](images/23_apt41.png)
+
+Nhận thấy các quốc gia mà APT41 hướng tới đều là quốc gia có nền công nghiệp game và phần mềm phát triển mạnh như Nhật Bản, Mỹ và Hàn Quốc, Ấn Độ v.v
+
+![alt text](images/24_apt41.png)
+
+Hình trên cho thấy thời gian tấn công của Apt41 theo khung thời gian của Trung Quốc. Nhận thấy vào thời điểm từ 18h tới 9 h sáng. Thời gian này là thời gian các nhân viên của công ty nghỉ ngơi.
+
+![alt text](images/25_phising_apt41.png)
+
+Hình 13 mô tả quy trình gửi phising email nhằm vào các công ty tài chính. Nhận thấy cá hacker đã tìm hiểu rất kỹ về các công ty này khi gửi mail, ngoài ra trong các tệp mail đính kèm các tệp tin có chứa mã độc
+
+## Sử dụng code-signing để phát tán mã độc
+
+Bằng việc chiếm được các private key của các chữ ký số hợp lệ của các công ty phát triển phần mềm, game. Thông qua việc phising email hay mua các private key ở chợ đen. nhóm APT41 sẽ dùng nó để ký vô các phần mềm của họ để phát tán mã độc. Điều này sẽ giúp mã độc qua mặt được các cơ chế bảo vệ của các hệ thống.
+
+## Sơ đồ lây nhiễm
+
+![alt text](images/26_attack_lifecircle.png)
+
+### Bước1: Initial Compromise(xâm nhập)
+
+APT41 sử dụng nhiều kỹ thuật đa dạng để xâm nhập vào đối tượng mục tiêu, cụ thể các kỹ thuật sau
+
+· Spear-phising: Kỹ thuật này nhắm vào mục tiêu cụ thể (thông qua tìm hiểu cụ thể về đối tượng, gửi mail có kèm theo các tệp mã độc).
+
+· TeamViewer: Team Viewer là một phần mềm cho phép làm việc từ xa thông qua cơ chế Remote Desktop. APT41 sử dụng phần mềm này để truyền các file DLL có chứa backdoor(CROSSWALK backdoor, HIGHNOON backdoor).
+
+· Khai thác các lỗ hổng CVE.
+
+### Bước2: Establish Foothold
+
+Sau khi xâm nhập được vào đối tượng mục tiêu, APT41 sử dụng nhiều các loại mã độc khác nhau để duy trì thiết lập chỗ đứng trên máy nạn nhân.
+
+![alt text](images/27_malware_apt41.png)
+
+Các loại mã độc được APT41 trong giai đoạn này sẽ được cài trên thư mục `c:\windows\temp`
+
+Các mã độc này thược được giả dạng là các file của các phân mềm anti-virus ví dụ như:
+
+· macfee.ga
+
+· kasparsky.net
+
+· symanteclabs.com
+
+Các domain mà các mã độc này dùng để thực hiện C&C (Command and controls) cũng được giả dạng thành các domain hợp lệ, cụ thể là tên miền của các anti-virus.
+
+
+### Bước4 Escalate Privileges(Leo thang đặc quyền)
+
+APT41 sử dụng các công cụ nổi tiếng để thực hiện leo thang đặc quyền(chiếm các quyền cao hơn trên máy mục tiêu), cụ thể các công cụ sau :
+
+· Mimikatz
+
+· PwDump
+
+· WINTERLOVE
+
+· ACEHASH
+
+· NTDSDump
+
+· PHOTO
+
+Ngoài ra công cụ Windows Credential Editor cũng được APT41 sử dụng để lấy các password hash làm chứng thực các tài khoản khác trong hệ thống của nạn nhân.
+
+### Bước5: Internal Reconnaissance(Do thám mạng nội bộ)
+
+Ở giai đoạn này APT41 sẽ thu thập các máy trong mạng của mục tiêu. Các công cụ của window như ‘netstat’, ‘net share’ được sử dụng để liệt kê các thông tin về mạng.
+
+Ngoài ra các logs trong các máy bị kiểm soát cũng được dùng trong giai đoạn này.
+
+Hơn nữa các loại mã độc được dùng để làm tác vụ này :
+
+· HIGHNOON: thu thập thông tin máy host và liệt kê các port Remote Desktop Protocol (RDP)
+
+· SOGU: liệt kê các thông tin kết nối trên giao thức TCP, UDP
+
+· WIDETONE: scan port, và tấn công brute force password, thu thập các thông tin về network
+
+### Bước6: Lateral Movement
+
+Ở giai đoạn này APT41 sẽ lây nhiễm và chiếm quyền điều khiển các máy khác. APT41 sử dụng nhiều chiến lược để thực hiện mục tiêu trên, cụ thể
+
+· Sử dụng đánh cắp các tài khoản chứng thực.
+
+· Sử dụng các chữ ký số, các private keys hợp lệ để ký vào các phần mềm game hợp lệ và phát tán mã độc.
+
+· Thêm tài khoản vào nhóm User và Admin
+
+· Brute force mật khẩu
+
+· RDP session.
+
+· Chỉnh sửa các dịch vụ widow hợp lệ để cài đặt các backdoor như HIGNOON, SOGU
+
+Với các tài khoản chiếm đoạt được , APT41 sẽ thực hiện thực hiện viết các mã độc HIGNOON có chứa payload và thông tin C&C. Sau đó thực thi các payload này bằng cách chỉnh sửa Windows WMI Performance Adaptor (wmiApSrv).
+
+Ngoài ra APT41 cũng sử dụng WMIEXEC (công cụ dùng để thực thi các câu lệnh WMI trên các máy từ xa ) để thực hiện các câu lệnh độc hại, ví dụ:
+
+
+![alt text](images/28_lateral_movement.png)
+
+### Bước7: Maintain Presence (Duy trì tồn tại trên máy nạn nhân)
+
+Để thực hiện duy trì sự tồn tại lâu dài trên máy nạn nhân, APT41 sử dụng các kỹ thuật sau:
+
+· Backdoor
+
+· Chỉnh sủa startup file
+
+· Chỉnh sửa registry
+
+· Rootkits
+
+· Bootkits
+
+· scheduled tasks
+
+· Sticky Keys vulnerability
+
+· Chỉnh sửa các luật trong tường lửa ví dụ cho phép truyền file bằng giao thức SMB.
+
+Để tránh sự phát hiện C&C, APT41 sử dụng các tên miền hợp lệ để tải các payload đã được mã hóa về máy nạn nhân. Các tên miền hợp lệ được sử dụng là : github, Pastebin, Microsoft TechNet
+
+Ngoài ra các backdoor cũng được chạy trong các port hợp lệ của ứng dụng để giảm khả năng bị phát hiện
+
+Hơn nữa APT41 cũng ngăn cản máy nạn nhân tải các phần mềm cập nhật của các phần mềm anti-virus bằng cách thay đổi các trường DNS, cụ thể các tên miền được dùng để cập nhật các phần mềm antivirus sẽ được forward lookup đến địa chỉ IP 1.1.1.1
+
+### Bước8: Complete Mission
+
+APT41 sử dụng file nén rar để truyền ra bên ngoài (exfiltration)
+
+APT41 cũng thực hiện xóa các dấu vết ví dụ: xóa lịch sử bash, xóa các sự kiện lịch sử trong Windows, chỉnh sửa DNS
+
+### Kỹ thuật Environmental Keying mà APT41 sử dụng trong 2 giai đoạn là :
+
+* Bước1: Initial Compromise(xâm nhập)
+
+* Bước6: Lateral Movement
+
+
+Sau khi có được các thông tin của máy mục tiêu ,bao gồm địa chỉ máy MAC, số Serial của ổ C:\ (điều này có được thông qua bước Bước5: Internal Reconnaissance(Do thám mạng nội bộ) )
+
+Các payload mã độc sẽ được mã hóa với key là địa chỉ máy MAC hoặc số Serial của ổ C:\
+
+Vì địa chỉ MAC và Serial ở C:\ là duy nhất cho mỗi máy nên chỉ có mục tiêu cụ thể thì mã độc mới được thực thi
+
+
+# Tham khảo
+
+[1] Mandiant (no date) APT41 chinese cyber threat group: Espionage & cyber crime, Mandiant. Available at: https://www.mandiant.com/resources/blog/apt41-dual-espionage-and-cyber-crime-operation (Accessed: 15 May 2024).
+
+[2] LordNoteworthy (no date) Lordnoteworthy/Al-Khaser at 967afa0d783ff9625caf1b069e3cd1246836b09f, GitHub. Available at: https://github.com/LordNoteworthy/al-khaser/tree/967afa0d783ff9625caf1b069e3cd1246836b09f (Accessed: 15 May 2024).
+
+[3] MITRE. (2024). MITRE ATT&CKTM. Mitre.org. https://attack.mitre.org/
+
+‌[4] FBI. (n.d.). APT 41 GROUP. Federal Bureau of Investigation. https://www.fbi.gov/wanted/cyber/apt-41-group
+
+‌[5] APT41, Group G0096 | MITRE ATT&CK®. (2019, September 23). Attack.mitre.org. https://attack.mitre.org/groups/G0096/
+
+‌
