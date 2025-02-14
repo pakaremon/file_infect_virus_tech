@@ -428,4 +428,11 @@ Vì địa chỉ MAC và Serial ở C:\ là duy nhất cho mỗi máy nên chỉ
 
 ‌[5] APT41, Group G0096 | MITRE ATT&CK®. (2019, September 23). Attack.mitre.org. https://attack.mitre.org/groups/G0096/
 
+‌[6] Anti-debugging and anti-VM techniques and anti-emulation [updated 2019] | Infosec. (2019). Infosecinstitute.com. https://www.infosecinstitute.com/resources/hacking/anti-debugging-and-anti-vm-techniques-and-anti-emulation/
+
+‌[7] Guibernau, F. (2020). Catch Me If You {Can!—Detecting} Sandbox Evasion Techniques. Usenix.org. https://www.usenix.org/conference/enigma2020/presentation/guibernau
+
+‌
+[8] Writing and Compiling Shellcode in C | Red Team Notes. (2020, November 25). Ired.team. https://www.ired.team/offensive-security/code-injection-process-injection/writing-and-compiling-shellcode-in-c
+
 ‌
